@@ -89,6 +89,33 @@ namespace linalg {
 			}
 		}
 
+		Matrix& operator=(const Matrix& m1) {
+			if (m_rows * m_columns > 0) {
+				delete[] m_ptr;
+			}
+
+			m_rows = m1.m_rows;
+			m_columns = m1.m_columns;
+			m_ptr = new double[m_rows * m_columns];
+
+			for (int i = 0; i < m_rows * m_columns; i++) {
+				m_ptr[i] = m1.m_ptr[i];
+			}
+
+			return *this;
+		}
+
+		Matrix& operator=(Matrix&& m1) {
+			if (m_rows * m_columns > 0) {
+				delete[] m_ptr;
+			}
+
+			m_rows = m1.m_rows;
+			m_columns = m1.m_columns;
+			m_ptr = m1.m_ptr;
+
+			return *this;
+		}
 
 	};
 }
