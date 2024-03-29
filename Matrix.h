@@ -117,5 +117,25 @@ namespace linalg {
 			return *this;
 		}
 
+		double& operator()(int i, int j){
+			if(0 <= i && i <m_rows && 0 <= j && j < m_columns){
+				return m_ptr[i * m_rows + j];
+			}
+			else {
+				delete[]m_ptr;
+				throw "double& operator()(int i, int j); //Index out of range.";
+			}
+		}
+
+		const double& operator()(int i, int j) const {
+			if (0 <= i && i < m_rows && 0 <= j && j < m_columns) {
+				return m_ptr[i * m_rows + j];
+			}
+			else {
+				delete[]m_ptr;
+				throw "double& operator()(int i, int j); //Index out of range.";
+			}
+		}
+
 	};
 }
