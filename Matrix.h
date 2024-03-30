@@ -243,6 +243,25 @@ namespace linalg {
 					}
 				}
 			}
+			return ans;
+		}
+
+		friend Matrix& operator*(double x, const Matrix& m) {
+			Matrix ans(m.m_rows, m.m_columns);
+			for (int i = 0; i < m.m_columns * m.m_rows; i++) {
+				std::cout << i << " = " << m.m_ptr[i] << " * " << x << " = " << m.m_ptr[i] * x << std::endl;
+
+				ans.m_ptr[i] = m.m_ptr[i] * x;
+			}
+
+			return ans;
+		}
+
+		friend Matrix& operator*(const Matrix& m, double x) {
+			Matrix ans(m.m_rows, m.m_columns);
+			for (int i = 0; i < m.m_columns * m.m_rows; i++) {
+				ans.m_ptr[i] = m.m_ptr[i] * x;
+			}
 
 			return ans;
 		}
