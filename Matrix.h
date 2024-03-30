@@ -275,6 +275,14 @@ namespace linalg {
 			return *this;
 		}
 
+		double trace() const {
+			int t = 0;
+			int n = m_rows;
+			for (int i = 0; i < n; i++){
+				t += (*this)(i, i);
+			}
+			return t;
+		}
 
 	};
 	
