@@ -233,7 +233,6 @@ namespace linalg {
 			}
 
 			Matrix ans(m_rows, m.m_columns);
-			int s = 0;
 			for (int i = 0; i < m_rows; i++) {
 				for (int j = 0; j < m.m_columns; j++) {
 					ans(i, j) = 0;
@@ -249,8 +248,6 @@ namespace linalg {
 		friend Matrix& operator*(double x, const Matrix& m) {
 			Matrix ans(m.m_rows, m.m_columns);
 			for (int i = 0; i < m.m_columns * m.m_rows; i++) {
-				std::cout << i << " = " << m.m_ptr[i] << " * " << x << " = " << m.m_ptr[i] * x << std::endl;
-
 				ans.m_ptr[i] = m.m_ptr[i] * x;
 			}
 
@@ -265,6 +262,20 @@ namespace linalg {
 
 			return ans;
 		}
+
+		Matrix& operator*=(const Matrix&m) {
+			*this = Matrix(*this * m);
+			return *this;
+		}
+
+		Matrix& operator*=(double x) {
+			for (int i = 0; i < m_columns * m_rows; i++) {
+				m_ptr[i] *= x;
+			}
+			return *this;
+		}
+
+
 	};
 	
 }
