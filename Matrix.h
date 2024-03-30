@@ -1,5 +1,6 @@
 #pragma once
 #include <initializer_list>
+#include <iomanip>
 
 namespace linalg {
 	class Matrix {
@@ -13,6 +14,7 @@ namespace linalg {
 			m_columns = 0;
 			m_ptr = nullptr;
 		}
+
 		Matrix(int rows) {
 			m_ptr = new double[rows];
 			m_rows = rows;
@@ -31,7 +33,7 @@ namespace linalg {
 			m_columns = m1.m_columns;
 		}
 
-		Matrix(Matrix&& moved) {
+		Matrix(Matrix&& moved) noexcept {
 			m_ptr = moved.m_ptr;
 			m_rows = moved.m_rows;
 			m_columns = moved.m_columns;
@@ -40,7 +42,7 @@ namespace linalg {
 		Matrix(const std::initializer_list<double>& list) : Matrix(list.size()) {
 			int i = 0;
 			for (auto el : list) {
-				m_ptr[i] = el;
+				m_ptr[i++] = el;
 			}
 		}
 
@@ -96,7 +98,7 @@ namespace linalg {
 
 			m_rows = m1.m_rows;
 			m_columns = m1.m_columns;
-			m_ptr = new double[m_rows * m_columns];
+			m_ptr = new double[static_cast<long long>(m_rows) * m_columns];
 
 			for (int i = 0; i < m_rows * m_columns; i++) {
 				m_ptr[i] = m1.m_ptr[i];
@@ -105,7 +107,7 @@ namespace linalg {
 			return *this;
 		}
 
-		Matrix& operator=(Matrix&& m1) {
+		Matrix& operator=(Matrix&& m1) noexcept {
 			if (m_rows * m_columns > 0) {
 				delete[] m_ptr;
 			}
@@ -126,16 +128,48 @@ namespace linalg {
 				throw "double& operator()(int i, int j); //Index out of range.";
 			}
 		}
-
+		
 		const double& operator()(int i, int j) const {
 			if (0 <= i && i < m_rows && 0 <= j && j < m_columns) {
 				return m_ptr[i * m_rows + j];
 			}
 			else {
 				delete[]m_ptr;
-				throw "double& operator()(int i, int j); //Index out of range.";
+				throw "const double& operator()(int i, int j) const; //Index out of range.";
 			}
+		}
+		
+		friend std::ostream& operator << (std::ostream& os, const Matrix& m)
+		{
+			double maxd = 0;
+			for (int i = 0; i < m.m_columns * m.m_rows; i++) {
+				if (maxd < m.m_ptr[i]) {
+					maxd = m.m_ptr[i];
+				}
+			}
+			int maxl = 0;
+			int maxi = static_cast<int>(maxd);
+			while (maxi > 0) {
+				maxi /= 10;
+				maxl++;
+			}
+			for (int i = 0; i < m.m_columns*m.m_rows;i++) {
+				if (i % m.m_columns == 0) {
+					os << "|";
+				}
+				os << std::setw(maxl) << std::setprecision(3) << m.m_ptr[i];
+				if ((i + 1) % m.m_columns == 0) {
+					os << "|";
+					if (i + 1 < m.m_columns * m.m_rows) {
+						os << '\n';
+					}
+				}
+				else os << " ";
+
+			}
+			return os;
 		}
 
 	};
+	
 }
