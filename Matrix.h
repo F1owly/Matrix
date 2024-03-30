@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <iomanip>
+#include <stdexcept>
 
 namespace linalg {
 	class Matrix {
@@ -16,12 +17,22 @@ namespace linalg {
 		}
 
 		Matrix(int rows) {
+			if (rows < 0) {
+				std::runtime_error("Rows at least zero!");
+			}
 			m_ptr = new double[rows];
 			m_rows = rows;
 			m_columns = 1;
+
 		}
 
 		Matrix(int rows, int cols) {
+			if (rows < 0) {
+				std::runtime_error("Rows at least zero!");
+			}
+			if (cols < 0) {
+				std::runtime_error("Cols at least zero!");
+			}
 			m_ptr = new double[static_cast<long long>(rows) * cols];
 			m_rows = rows;
 			m_columns = cols;
@@ -170,6 +181,71 @@ namespace linalg {
 			return os;
 		}
 
+		Matrix operator+(const Matrix& m) const{
+			if (m_rows != m.m_rows || m_columns != m.m_columns) {
+				std::runtime_error("The matrices must be of the same size!");
+			}
+
+			Matrix ans(m_rows, m_columns);
+			for (int i = 0; i < m_columns * m_rows; i++) {
+				ans.m_ptr[i] = m_ptr[i] + m.m_ptr[i];
+			}
+			return ans;
+		}
+
+		Matrix& operator+=(const Matrix& m) {
+			if (m_rows != m.m_rows || m_columns != m.m_columns) {
+				std::runtime_error("The matrices must be of the same size!");
+			}
+
+			for (int i = 0; i < m_columns * m_rows; i++) {
+				m_ptr[i] += m.m_ptr[i];
+			}
+			return *this;
+		}
+
+		Matrix operator-(const Matrix& m) const {
+			if (m_rows != m.m_rows || m_columns != m.m_columns) {
+				std::runtime_error("The matrices must be of the same size!");
+			}
+
+			Matrix ans(m_rows, m_columns);
+			for (int i = 0; i < m_columns * m_rows; i++) {
+				ans.m_ptr[i] = m_ptr[i] - m.m_ptr[i];
+			}
+			return ans;
+		}
+
+		Matrix& operator-=(const Matrix& m) {
+			if (m_rows != m.m_rows || m_columns != m.m_columns) {
+				std::runtime_error("The matrices must be of the same size!");
+			}
+
+			for (int i = 0; i < m_columns * m_rows; i++) {
+				m_ptr[i] -= m.m_ptr[i];
+			}
+			return *this;
+		}
+
+		Matrix operator*(const Matrix& m) const{
+			if (m_columns != m.m_rows) {
+				std::runtime_error("The matrices are not compatible");
+			}
+
+			Matrix ans(m_rows, m.m_columns);
+			int s = 0;
+			for (int i = 0; i < m_rows; i++) {
+				for (int j = 0; j < m.m_columns; j++) {
+					ans(i, j) = 0;
+					for (int k = 0; k < m_columns; k++) {
+						ans(i, j) += m(k, j) * m_ptr[i * m_rows + k];
+
+					}
+				}
+			}
+
+			return ans;
+		}
 	};
 	
 }
