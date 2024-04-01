@@ -500,3 +500,15 @@ namespace linalg {
 		}
 		return ans;
 	}
+
+	linalg::Matrix transpose(const linalg::Matrix& m) {
+		linalg::Matrix ans(m.columns(), m.rows());
+
+		for (int i = 0; i < ans.rows(); i++) {
+			for (int j = 0; j < ans.columns(); j++) {
+				ans(i, j) = m(j, i);
+			}
+		}
+
+		return ans;
+	}
