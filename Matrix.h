@@ -449,10 +449,26 @@ namespace linalg {
 				}
 			}
 			return *this;
-
 		}
 
+		int rank() const{
+			Matrix ans = *this;
 
+			ans.gauss_forward();
+			ans.gauss_back();
+
+			int rank = 0;
+			for (int i = 0; i < m_rows; i++) {
+				for (int j = 0; j < m_columns; j++) {
+					if (abs(ans(i, j)) > EPS) {
+						rank++;
+						break;
+					}
+				}
+			}
+
+			return rank;
+		}
 	};
 	
 }
