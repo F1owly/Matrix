@@ -2,7 +2,7 @@
 #include <initializer_list>
 #include <iomanip>
 #include <stdexcept>
-
+#define EPS 0.000000001
 namespace linalg {
 	class Matrix {
 	private:
@@ -132,21 +132,21 @@ namespace linalg {
 
 		double& operator()(int i, int j){
 			if(0 <= i && i <m_rows && 0 <= j && j < m_columns){
-				return m_ptr[i * m_rows + j];
+				return m_ptr[i * m_columns + j];
 			}
 			else {
 				delete[]m_ptr;
-				throw "double& operator()(int i, int j); //Index out of range.";
+				std::runtime_error("double& operator()(int i, int j); //Index out of range.");
 			}
 		}
 		
 		const double& operator()(int i, int j) const {
 			if (0 <= i && i < m_rows && 0 <= j && j < m_columns) {
-				return m_ptr[i * m_rows + j];
+				return m_ptr[i * m_columns + j];
 			}
 			else {
 				delete[]m_ptr;
-				throw "const double& operator()(int i, int j) const; //Index out of range.";
+				std::runtime_error("const double& operator()(int i, int j) const; //Index out of range.");
 			}
 		}
 		
@@ -168,7 +168,7 @@ namespace linalg {
 				if (i % m.m_columns == 0) {
 					os << "|";
 				}
-				os << std::setw(maxl) << std::setprecision(3) << m.m_ptr[i];
+				os << std::setw(maxl+4) << std::setprecision(3) << m.m_ptr[i];
 				if ((i + 1) % m.m_columns == 0) {
 					os << "|";
 					if (i + 1 < m.m_columns * m.m_rows) {
@@ -276,6 +276,10 @@ namespace linalg {
 		}
 
 		double trace() const {
+			if (m_rows != m_columns) {
+				std::runtime_error("Matrix is not square!");
+			}
+
 			int t = 0;
 			int n = m_rows;
 			for (int i = 0; i < n; i++){
@@ -283,6 +287,84 @@ namespace linalg {
 			}
 			return t;
 		}
+
+		double det() const {
+			if (m_rows != m_columns) {
+				std::runtime_error("Matrix is not square!");
+			}
+
+			double det = 0;
+			int n = m_rows;
+			Matrix a(*this);
+			std::cout << a << std::endl;
+			for (int i = 0; i < n; ++i) {
+				int k = i;
+				for (int j = i + 1; j < n; ++j)
+					if (abs(a(j, i)) > abs(a(k, i)))
+						k = j;
+				if (abs(a(k, i)) < EPS) {
+					det = 0;
+					break;
+				}
+
+				for (int ss = 0; ss < n; ss++) {
+					double swaper = a(k, ss);
+					a(k, ss) = a(i, ss);
+					a(i, ss) = swaper;
+				}
+
+				if (i != k)
+					det = -det;
+				det *= a(i, i);
+				for (int j = i + 1; j < n; ++j)
+					a(i, j) /= a(i, i);
+				for (int j = 0; j < n; ++j){
+					if (j != i && abs(a(j, i)) > EPS) {
+						for (int k = i + 1; k < n; ++k){
+							a(j, k) -= a(i, k);
+						}
+					}
+				}
+				std::cout << std::endl;
+				std::cout << a << std::endl;
+			}
+			return det;
+
+		}
+
+		Matrix& gauss_forward() {
+			Matrix ans (std::move(*this));
+			//(i, i_) - это координаты потенциального опорного элемента
+			for (int i = 0, i_ = 0; i < m_rows && i_ < m_columns; i++, i_++) {
+				int j = i; // j - строка, с максимальнм элементом в столбце i_
+				for (int k = i + 1; k < m_rows; k++) {
+					if (abs(ans(k, i_)) > abs(ans(j, i_))) {
+						j = k;
+					}
+				}
+				//если все элементы в столбце i_ нулевые, переходим на следующий столбец
+				if (abs(ans(j, i_)) < EPS) {
+					i--;
+					continue;
+				}
+				//ставим строку с максимальным элементом на место строки i
+				for (int k = 0; k < m_columns; k++) {
+					double swapper = ans(i, k);
+					ans(i, k) = ans(j, k);
+					ans(j, k) = swapper;
+				}
+				//вычитаем из всех строк, что ниже строки i, эту строку, домноженый на коэфицент так, чтобы все элементы i_ого столбца cтали равны 0
+				for (int h = i + 1; h < m_rows; h++) {
+					double coef = ans(h, i_) / ans(i, i_);
+					for (int k = 0; k < m_columns; k++) {
+						ans(h, k) -= ans(i, k) * coef;
+					}
+				}
+			}
+			return *this;
+		}
+
+
 
 	};
 	
