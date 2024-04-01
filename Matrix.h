@@ -2,7 +2,7 @@
 #include <initializer_list>
 #include <iomanip>
 #include <stdexcept>
-#define EPS 0.000000001
+#define EPS 0.00000001
 namespace linalg {
 	class Matrix {
 	private:
@@ -173,7 +173,13 @@ namespace linalg {
 				if (i % m.m_columns == 0) {
 					os << "|";
 				}
-				os << std::setw(maxl+4) << std::setprecision(3) << m.m_ptr[i];
+				if (abs(m.m_ptr[i]) > EPS) {
+					os << std::setw(maxl + 4) << std::setprecision(3) << m.m_ptr[i];
+				}
+				else {
+					os << std::setw(maxl + 4) << std::setprecision(3) << 0;
+
+				}
 				if ((i + 1) % m.m_columns == 0) {
 					os << "|";
 					if (i + 1 < m.m_columns * m.m_rows) {
@@ -285,12 +291,11 @@ namespace linalg {
 				throw std::runtime_error("Matrix is not square!");
 			}
 
-			int t = 0;
-			int n = m_rows;
-			for (int i = 0; i < n; i++){
-				t += (*this)(i, i);
+			int trace = 0;
+			for (int i = 0; i < m_rows; i++){
+				trace += (*this)(i, i);
 			}
-			return t;
+			return trace;
 		}
 
 		double det() const{
@@ -377,6 +382,75 @@ namespace linalg {
 			return *this;
 		}
 
+		Matrix& gauss_back() {
+			Matrix ans(std::move(*this));
+			{
+				//проверка на то что матрица ступенчатая
+				int j_based = -1;
+				bool zeros_row = true;
+				
+				for (int i = 0; i < m_rows; i++) {
+					for (int j = 0; j < m_columns; j++) {
+						if (abs(ans(i, j)) > EPS) {
+							if (j_based > j) {
+								throw std::runtime_error("Matrix is not step view!");
+							}
+							j_based = j;
+							zeros_row = false;
+							break;
+						}
+					}
+
+					if (zeros_row) {
+						continue;
+					}
+
+					for (int k = i + 1; k < m_rows; k++) {
+						if (abs(ans(k, j_based)) > EPS) {
+							throw std::runtime_error("Matrix is not step view!");
+						}
+					}
+
+					zeros_row = true;
+				}
+			}
+			int n = -1;
+			for (int i = m_rows - 1; i >= 0; i--) {
+				for (int j = 0; j < m_columns; j++) {
+					if (abs(ans(i, j)) > EPS) {
+						n = i;
+						i = -1;
+						break;
+					}
+				}
+			}
+
+			if (n == -1){
+				return *this;
+			}
+
+			for (int i = n; i >= 0; i--){
+				int j_based = -1; 
+				for (int j = 0; j < m_columns; j++) {
+					if (abs(ans(i, j)) > EPS) {
+						j_based = j;
+						break;
+					}
+				}
+				if (j_based == -1) {
+					continue;
+				}
+
+				for (int k = 0; k < i; k++) {
+					double coef = ans(k, j_based) / ans(i, j_based);
+					for (int h = 0; h < m_columns; h++) {
+						ans(k, h) -= coef * ans(i, h);
+					}
+				}
+			}
+			return *this;
+
+		}
 
 
 	};
