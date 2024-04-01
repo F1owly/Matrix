@@ -74,7 +74,7 @@ namespace linalg {
 			int cols = 0;
 			for (auto el_list : list) {
 				for (auto el : el_list) {
-					if(cols >= m_columns)
+					if (cols >= m_columns)
 						throw std::runtime_error("Can`t create matrix! Invalid initializer_list!");
 					m_ptr[i++] = el;
 					cols++;
@@ -83,15 +83,15 @@ namespace linalg {
 			}
 		}
 
-		int rows() const{
+		int rows() const {
 			return m_rows;
 		}
 
-		int columns() const{
+		int columns() const {
 			return m_columns;
 		}
 
-		bool empty() const{
+		bool empty() const {
 			if (m_rows == 0 || m_columns == 0) {
 				return true;
 			}
@@ -136,8 +136,8 @@ namespace linalg {
 			return *this;
 		}
 
-		double& operator()(int i, int j){
-			if(0 <= i && i <m_rows && 0 <= j && j < m_columns){
+		double& operator()(int i, int j) {
+			if (0 <= i && i < m_rows && 0 <= j && j < m_columns) {
 				return m_ptr[i * m_columns + j];
 			}
 			else {
@@ -145,7 +145,7 @@ namespace linalg {
 				throw std::runtime_error("double& operator()(int i, int j); //Index out of range.");
 			}
 		}
-		
+
 		const double& operator()(int i, int j) const {
 			if (0 <= i && i < m_rows && 0 <= j && j < m_columns) {
 				return m_ptr[i * m_columns + j];
@@ -155,7 +155,7 @@ namespace linalg {
 				throw std::runtime_error("const double& operator()(int i, int j) const; //Index out of range.");
 			}
 		}
-		
+
 		friend std::ostream& operator << (std::ostream& os, const Matrix& m)
 		{
 			double maxd = 0;
@@ -170,7 +170,7 @@ namespace linalg {
 				maxi /= 10;
 				maxl++;
 			}
-			for (int i = 0; i < m.m_columns*m.m_rows;i++) {
+			for (int i = 0; i < m.m_columns * m.m_rows; i++) {
 				if (i % m.m_columns == 0) {
 					os << "|";
 				}
@@ -193,7 +193,7 @@ namespace linalg {
 			return os;
 		}
 
-		Matrix operator+(const Matrix& m) const{
+		Matrix operator+(const Matrix& m) const {
 			if (m_rows != m.m_rows || m_columns != m.m_columns) {
 				throw std::runtime_error("The matrices must be of the same size!");
 			}
@@ -239,7 +239,7 @@ namespace linalg {
 			return *this;
 		}
 
-		Matrix operator*(const Matrix& m) const{
+		Matrix operator*(const Matrix& m) const {
 			if (m_columns != m.m_rows) {
 				throw std::runtime_error("The matrices are not compatible");
 			}
@@ -275,7 +275,7 @@ namespace linalg {
 			return ans;
 		}
 
-		Matrix& operator*=(const Matrix&m) {
+		Matrix& operator*=(const Matrix& m) {
 			*this = Matrix(*this * m);
 			return *this;
 		}
@@ -293,13 +293,13 @@ namespace linalg {
 			}
 
 			int trace = 0;
-			for (int i = 0; i < m_rows; i++){
+			for (int i = 0; i < m_rows; i++) {
 				trace += (*this)(i, i);
 			}
 			return trace;
 		}
 
-		double det() const{
+		double det() const {
 			if (m_rows != m_columns) {
 				throw std::runtime_error("Matrix is not square!");
 			}
@@ -352,7 +352,7 @@ namespace linalg {
 		}
 
 		Matrix& gauss_forward() {
-			Matrix ans (std::move(*this));
+			Matrix ans(std::move(*this));
 			//(i, i_) - это координаты потенциального опорного элемента
 			for (int i = 0, i_ = 0; i < m_rows && i_ < m_columns; i++, i_++) {
 				int j = i; // j - строка, с максимальнм элементом в столбце i_
@@ -389,7 +389,7 @@ namespace linalg {
 				//проверка на то что матрица ступенчатая
 				int j_based = -1;
 				bool zeros_row = true;
-				
+
 				for (int i = 0; i < m_rows; i++) {
 					for (int j = 0; j < m_columns; j++) {
 						if (abs(ans(i, j)) > EPS) {
@@ -426,12 +426,12 @@ namespace linalg {
 				}
 			}
 
-			if (n == -1){
+			if (n == -1) {
 				return *this;
 			}
 
-			for (int i = n; i >= 0; i--){
-				int j_based = -1; 
+			for (int i = n; i >= 0; i--) {
+				int j_based = -1;
 				for (int j = 0; j < m_columns; j++) {
 					if (abs(ans(i, j)) > EPS) {
 						j_based = j;
@@ -452,7 +452,7 @@ namespace linalg {
 			return *this;
 		}
 
-		int rank() const{
+		int rank() const {
 			Matrix ans = *this;
 
 			ans.gauss_forward();
@@ -478,6 +478,25 @@ namespace linalg {
 			}
 			return std::sqrt(sum2);
 		}
+
+
 	};
-	
 }
+
+	linalg::Matrix concatenate(const linalg::Matrix& m1, const linalg::Matrix& m2) {//cклеивает по горизонтали
+		if (m1.rows() != m2.rows()) {
+			throw std::runtime_error("The matrices have a different number of rows!");
+		}
+
+		linalg::Matrix ans(m1.rows(), m1.columns() + m2.columns());
+
+		for (int i = 0; i < m1.rows(); i++) {
+			for (int j = 0; j < m1.columns(); j++) {
+				ans(i, j) = m1(i, j);
+			}
+			for (int j = 0; j < m2.columns(); j++) {
+				ans(i, m1.columns() + j) = m2(i, j);
+			}
+		}
+		return ans;
+	}
