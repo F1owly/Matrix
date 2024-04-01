@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <iomanip>
+#include <math.h>
 #include <stdexcept>
 #define EPS 0.00000001
 namespace linalg {
@@ -468,6 +469,14 @@ namespace linalg {
 			}
 
 			return rank;
+		}
+
+		double norm() const {
+			int sum2 = 0;
+			for (int i = 0; i < static_cast<long long>(m_rows * m_columns); i++) {
+				sum2 += m_ptr[i] * m_ptr[i];
+			}
+			return std::sqrt(sum2);
 		}
 	};
 	
