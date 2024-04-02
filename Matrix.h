@@ -479,7 +479,7 @@ namespace linalg {
 			return std::sqrt(sum2);
 		}
 
-
+		
 	};
 }
 
@@ -511,4 +511,58 @@ namespace linalg {
 		}
 
 		return ans;
+	}
+
+	double minor(const linalg::Matrix& m, int i_, int j_) {
+		if (m.rows() != m.columns()) {
+			throw std::runtime_error("Matrix is not square!");
+		}
+		if (m.rows() < 2 || m.columns() < 2) {
+			throw std::runtime_error("Matrix is 1x1 or less!");
+		}
+
+		i_--;
+		j_--;
+
+		linalg::Matrix minor(m.rows() - 1, m.columns() - 1);
+		int counted = 0;
+		for (int i = 0; i < m.rows(); i++) {
+			if (i == i_) {
+				continue;
+			}
+			for (int j = 0; j < m.columns(); j++) {
+				if (j == j_) {
+					continue;
+				}
+				minor(static_cast<int>(counted/minor.columns()), static_cast<int>(counted % minor.columns())) = m(i, j);
+				counted++;
+			}
+		}
+		return minor.det();
+	}
+
+	double cofactor(const linalg::Matrix& m, int i_, int j_) {
+		return std::pow(-1, i_ + j_) * minor(m, i_, j_);
+	}
+
+	linalg::Matrix invert(const linalg::Matrix& m) {
+		if (m.rows() != m.columns()) {
+			throw std::runtime_error("Matrix is not square!");
+		}
+
+		if (abs(m.det()) < EPS) {
+			throw std::runtime_error("Determinante is zero!");
+		}
+
+		linalg::Matrix cofactors(m.rows(), m.columns());
+
+		for (int i = 0; i < m.rows(); i++) {
+			for (int j = 0; j < m.columns(); j++) {
+				cofactors(i, j) = cofactor(m, i+1, j+1);
+			}
+		}
+		std::cout << cofactors << std::endl;
+		cofactors = transpose(cofactors) * (1/m.det());
+
+		return cofactors;
 	}
