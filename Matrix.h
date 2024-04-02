@@ -517,8 +517,11 @@ namespace linalg {
 		if (m.rows() != m.columns()) {
 			throw std::runtime_error("Matrix is not square!");
 		}
-		if (m.rows() < 2 || m.columns() < 2) {
+		if (m.rows() < 1 || m.columns() < 1) {
 			throw std::runtime_error("Matrix is 1x1 or less!");
+		}
+		if (m.rows() == 1 || m.columns() == 1) {
+			return 1;
 		}
 
 		i_--;
@@ -561,8 +564,7 @@ namespace linalg {
 				cofactors(i, j) = cofactor(m, i+1, j+1);
 			}
 		}
-		std::cout << cofactors << std::endl;
+		
 		cofactors = transpose(cofactors) * (1/m.det());
-
 		return cofactors;
 	}
